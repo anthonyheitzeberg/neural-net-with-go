@@ -77,7 +77,8 @@ func main() {
 	}
 
 	accuracy := float64(truePosNeg) / float64(numPreds)
-	fmt.Printf("\nAccuracy: %0.2f%%\n\n", accuracy)
+	// Output the Accuracy value to standard out.
+	fmt.Printf("\nAccuracy = %0.2f\n\n", accuracy)
 }
 
 // This function initializes a new neural network with the given configuration.
