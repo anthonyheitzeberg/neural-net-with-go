@@ -27,6 +27,10 @@ type neuralNetConfig struct {
 	learningRate  float64
 }
 
+func main() {
+	fmt.Println("Hello, World!")
+}
+
 // This function initializes a new neural network with the given configuration.
 func newNetwork(config neuralNetConfig) *neuralNet {
 	return &neuralNet{config: config}
@@ -183,6 +187,36 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 	return nil
 }
 
-func main() {
-	fmt.Println("Hello, World!")
+// Makes predictions using the trained neural network.
+func (nn *neuralNet) predict(x *mat.Dense) (*mat.Dense, error) {
+	// Check to make sure that our neuralNet value represents a trained model.
+	if nn.wHidden == nil || nn.wOut == nil {
+		return nil, errors.New("the supplied weights are empty")
+	}
+	if nn.bHidden == nil || nn.bOut == nil {
+		return nil, errors.New("the supplied biases are empty")
+	}
+	// Forward pass: compute the output of the neural network.
+	output := new(mat.Dense)
+	hiddenLayerInput := new(mat.Dense)
+	hiddenLayerInput.Mul(x, nn.wHidden)
+	addBHidden := func(_, col int, v float64) float64 {
+		return v + nn.bHidden.At(0, col)
+	}
+	hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
+	hiddenLayerActivations := new(mat.Dense)
+	applySigmoid := func(_, _ int, v float64) float64 {
+		return sigmoid(v)
+	}
+	hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
+
+	outputLayerInput := new(mat.Dense)
+	outputLayerInput.Mul(hiddenLayerActivations, nn.wOut)
+	addBOut := func(_, col int, v float64) float64 {
+		return v + nn.bOut.At(0, col)
+	}
+	outputLayerInput.Apply(addBOut, outputLayerInput)
+	output.Apply(applySigmoid, outputLayerInput)
+
+	return output, nil
 }
